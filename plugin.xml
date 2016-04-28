@@ -43,6 +43,7 @@
       </feature>
     </config-file>
     <source-file src="src/android/nl/xservices/plugins/SSLCertificateChecker.java" target-dir="src/nl/xservices/plugins"/>
+    <source-file src="src/android/nl/xservices/plugins/CustomX509TrustManager.java" target-dir="src/nl/xservices/plugins"/>
   </platform>
 
   <!-- windows -->
