@@ -6,11 +6,15 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
 import javax.security.cert.CertificateException;
 import java.io.IOException;
 import java.net.URL;
+import java.security.KeyManagementException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 
@@ -24,7 +28,7 @@ public class SSLCertificateChecker extends CordovaPlugin {
     if (ACTION_CHECK_EVENT.equals(action)) {
       cordova.getThreadPool().execute(new Runnable() {
         public void run() {
-          try {
+          try {          
             final String serverURL = args.getString(0);
             final JSONArray allowedFingerprints = args.getJSONArray(2);
             final String serverCertFingerprint = getFingerprint(serverURL);
@@ -47,9 +51,16 @@ public class SSLCertificateChecker extends CordovaPlugin {
     }
   }
 
-  private static String getFingerprint(String httpsURL) throws IOException, NoSuchAlgorithmException, CertificateException, CertificateEncodingException {
+  private static String getFingerprint(String httpsURL) throws IOException, NoSuchAlgorithmException, CertificateException, CertificateEncodingException, KeyManagementException {
     final HttpsURLConnection con = (HttpsURLConnection) new URL(httpsURL).openConnection();
     con.setConnectTimeout(5000);
+
+    SSLContext ctx = SSLContext.getInstance("TLS");
+    ctx.init(null, new TrustManager[]{new CustomX509TrustManager()},
+            new SecureRandom());
+
+    con.setSSLSocketFactory(ctx.getSocketFactory());
+
     con.connect();
     final Certificate cert = con.getServerCertificates()[0];
     final MessageDigest md = MessageDigest.getInstance("SHA1");
