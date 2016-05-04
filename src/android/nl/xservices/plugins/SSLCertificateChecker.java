@@ -7,6 +7,7 @@ import org.json.JSONException;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLException;
 import javax.net.ssl.TrustManager;
 import javax.security.cert.CertificateException;
 import java.io.IOException;
@@ -39,6 +40,8 @@ public class SSLCertificateChecker extends CordovaPlugin {
               }
             }
             callbackContext.error("CONNECTION_NOT_SECURE");
+          } catch (SSLException e) {
+            callbackContext.success("CONNECTION_SECURE");   //Ошибка возникает на старых андроидах, которые не оддерживают TLSv1.0, если сервер тоже его не поддерживает
           } catch (Exception e) {
             callbackContext.error("CONNECTION_FAILED. Details: " + e.getMessage());
           }
